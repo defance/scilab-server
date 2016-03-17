@@ -1,0 +1,1 @@
+-e git+https://de.ifmo.ru/scm/git/ifmo-xqueue-api@c945da8#egg=ifmo-xqueue-api-0.4
