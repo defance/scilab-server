@@ -1,16 +1,15 @@
 # -*- coding=utf-8 -*-
 
-from fcntl import fcntl, F_GETFL, F_SETFL
-from os import O_NONBLOCK, read
-from subprocess import Popen, PIPE
-
 import logging
-import os
 import signal
 import time
 import uuid
 
-from scilab_server.settings import *
+from fcntl import fcntl, F_GETFL, F_SETFL
+from os import O_NONBLOCK, read
+from subprocess import Popen, PIPE
+
+from .settings import *
 
 logger = logging.getLogger(__name__)
 

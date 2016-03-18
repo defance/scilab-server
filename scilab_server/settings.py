@@ -1,8 +1,10 @@
-from path import path
 import os
 import json
 
+from path import path
+
 from .env.common import *
+
 
 PROJECT_ROOT = path(__file__).abspath().dirname()
 REPO_ROOT = PROJECT_ROOT.dirname()

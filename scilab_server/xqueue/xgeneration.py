@@ -1,7 +1,7 @@
+import json
+
 from xqueue_api.utils import deep_update
 from xqueue_api.xobject import XObject
-
-import json
 
 
 class XGeneration(XObject):

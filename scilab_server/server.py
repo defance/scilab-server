@@ -1,21 +1,20 @@
 # -*- coding=utf-8 -*-
 
-from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
-from cgi import FieldStorage
-from cStringIO import StringIO
-import sys
-import logging
-import zipfile
-import time
-import requests
 import base64
+import logging
+import requests
+import sys
 import tempfile
+import time
+import zipfile
 
-from scilab_server.executable import spawn_scilab
-from scilab_server.settings import *
-from xqueue.xgeneration import XGeneration
+from cStringIO import StringIO
 from xqueue_api import XQueueSession
 from xqueue_api.xsubmission import XSubmission
+
+from .executable import spawn_scilab
+from .settings import *
+from xqueue.xgeneration import XGeneration
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler(sys.stdout))
