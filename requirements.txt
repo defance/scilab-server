@@ -1,1 +1,1 @@
--e git+https://de.ifmo.ru/scm/git/ifmo-xqueue-api@c945da8#egg=ifmo-xqueue-api-0.4
+-e git+https://de.ifmo.ru/scm/git/ifmo-xqueue-api@15da5ae#egg=ifmo-xqueue-api-0.4.1
