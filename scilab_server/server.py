@@ -32,10 +32,6 @@ def make_result(msg=None, grade=0.0):
     }
 
 
-def do_check(xsubmission):
-    raise NotImplementedError()
-
-
 def get_raw_archive(data, archive):
     archive_path = path(data.get('%s_name' % archive))
     archive_raw = StringIO(base64.decodestring(data.get(archive)))
@@ -55,7 +51,10 @@ def do_generate(xgeneration):
     # Полный рабочий путь в системе, со временной директорией, сразу вычистим
     # TODO: generate RANDOM path using guid
     full_path = tempfile.mkdtemp(prefix=TMP_PATH)
-    cleanup(cwd=full_path)
+
+    # Подчистка с самого начала нам не нужна, поскольку можно положиться на то,
+    # что будет создан уникальный путь
+    # cleanup(cwd=full_path)
 
     try:
         instructor_archive = zipfile.ZipFile(instructor_file)
@@ -82,82 +81,82 @@ def do_generate(xgeneration):
     return xgeneration
 
 
-class ScilabServer(object):
+def do_check(xsubmission):
 
-    def do_check(self):
+    xsubmission.set_grade(grader='scilab_grader_01')
 
-        def do():
+    result = {}
 
-            result = {}
+    # Dicts
+    student_input = json.loads(xsubmission.student_response)
+    grader_payload = xsubmission.grader_payload
 
-            # Dicts
-            student_input = json.loads(self.xsubmission.student_response)
-            grader_payload = self.xsubmission.grader_payload
+    # Archives
+    data = get_archives(student_input.get('archive_64_url'))
 
-            # Archives
-            data = get_archives(student_input.get('archive_64_url'))
+    student_filename, student_file = get_raw_archive(data, 'user_archive')
+    instructor_filename, instructor_file = get_raw_archive(data, 'instructor_archive')
 
-            student_filename, student_file = get_raw_archive(data, 'user_archive')
-            instructor_filename, instructor_file = get_raw_archive(data, 'instructor_archive')
+    # Проверка на то, что это действительно zip
+    if student_filename.ext != '.zip':
+        return xsubmission.set_grade(feedback='NZ: Загруженный файл должен быть .zip.')
 
-            # Проверка на то, что это действительно zip
-            if student_filename.ext != '.zip':
-                raise Exception('NZ: Загруженный файл должен быть .zip.')
+    # Полный рабочий путь в системе, со временной директорией, сразу вычистим
+    full_path = tempfile.mkdtemp(prefix=TMP_PATH)
 
-            # Полный рабочий путь в системе, со временной директорией, сразу вычистим
-            full_path = TMP_PATH / student_filename.stripext()
-            cleanup(cwd=full_path)
+    # Подчистка с самого начала нам не нужна, поскольку можно положиться на то,
+    # что будет создан уникальный путь
+    # cleanup(cwd=full_path)
 
-            # Получаем архивы
-            student_archive = zipfile.ZipFile(student_file)
-            instructor_archive = zipfile.ZipFile(instructor_file)
+    # Получаем архивы
+    student_archive = zipfile.ZipFile(student_file)
+    instructor_archive = zipfile.ZipFile(instructor_file)
 
-            # Извлекаем архив студента
-            try:
-                student_archive.extractall(full_path)
-            except Exception:
-                return make_result(msg='SAE: Не удалось открыть архив с ответом.')
+    # Извлекаем архив студента
+    try:
+        student_archive.extractall(full_path)
+    except Exception:
+        return xsubmission.set_grade(feedback='SAE: Не удалось открыть архив с ответом.')
 
-            # Процессу разрешено выполняться только 2 секунды
-            filename = full_path / SCILAB_STUDENT_SCRIPT
+    # Процессу разрешено выполняться только 2 секунды
+    filename = full_path / SCILAB_STUDENT_SCRIPT
 
-            # Допишем функцию выходна, на всякий случай
-            with open(filename, "a") as source_file:
-                source_file.write("exit();")
+    # Допишем функцию выходна, на всякий случай
+    with open(filename, "a") as source_file:
+        source_file.write("exit();")
 
-            student_code = spawn_scilab(filename, timeout=15)
-            if student_code.get('return_code') == -1:
-                return make_result(msg='TL: Превышен лимит времени')
+    student_code = spawn_scilab(filename, timeout=15)
+    if student_code.get('return_code') == -1:
+        return xsubmission.set_grade(feedback='TL: Превышен лимит времени')
 
-            try:
-                instructor_archive.extractall(full_path)
-            except Exception:
-                return make_result(msg='IAE: Не удалось открыть архив инструктора.')
+    # Запишем pregenerated, если он вообще есть
+    if xsubmission.grader_payload is not None:
+        with open(full_path / "pregenerated", "w") as f:
+            f.write(xsubmission.grader_payload)
 
-            filename = full_path / SCILAB_INSTRUCTOR_SCRIPT
+    try:
+        instructor_archive.extractall(full_path)
+    except Exception:
+        return xsubmission.set_grade(feedback='IAE: Не удалось открыть архив инструктора.')
 
-            # Допишем функцию выхода, на всякий случай
-            with open(filename, "a") as source_file:
-                source_file.write("\nexit();\n")
+    filename = full_path / SCILAB_INSTRUCTOR_SCRIPT
 
-            checker_code = spawn_scilab(filename, timeout=15)
-            if checker_code.get('return_code') == -1:
-                return make_result(msg='ITL: Превышен лимит времени инструктором')
+    # Допишем функцию выхода, на всякий случай
+    with open(filename, "a") as source_file:
+        source_file.write("\nexit();\n")
 
-            try:
-                f = open(full_path + '/checker_output')
-                result_grade = float(f.readline().strip())
-                result_message = f.readline().strip()
-            except IOError:
-                return make_result(
-                    msg='COE: Не удалось определить результат проверки.'
-                )
+    checker_code = spawn_scilab(filename, timeout=15)
+    if checker_code.get('return_code') == -1:
+        return xsubmission.set_grade(feedback='ITL: Превышен лимит времени инструктором')
 
-            return make_result(msg=result_message, grade=result_grade)
+    try:
+        f = open(full_path / 'check_output')
+        result_grade = float(f.readline().strip())
+        result_message = f.readline().strip()
+    except IOError:
+        return xsubmission.set_grade(feedback='COE: Не удалось определить результат проверки.')
 
-        res = do()
-        self.xsubmission.set_grade(grade=res['grade'], feedback=res['msg'], grader='scilab_grader_01', correctness=True)
-        return self.xsubmission
+    return xsubmission.set_grade(grade=result_grade, feedback=result_message, correctness=True)
 
 
 def main():
@@ -182,13 +181,22 @@ def main():
                 body = json.loads(xobject.body)
                 method = body['method']
 
+                # print u">%s<" % method
+                # print u"method==check => %s" % (method == u'check')
+                # print u"method==generate => %s" % (method == u'generate')
+                # print u"method==generate => %s" % (method == u'generate')
+
                 if method == u'check':
                     result = do_check(XSubmission.create_from_xobject(xobject))
 
                 elif method == u'generate':
+                    print u"method==generate => %s" % (method == u'generate')
                     result = do_generate(XGeneration.create_from_xobject(xobject))
 
                 else:
+                    print u"unknown method: %s" % method
+                    print u"method==check => %s" % (method == u'check')
+                    print u"method==generate => %s" % (method == u'generate')
                     result = make_result("Unknown method: %s" % method)
 
                 xsession.put_xresult(result)
