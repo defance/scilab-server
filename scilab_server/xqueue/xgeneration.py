@@ -13,6 +13,7 @@ class XGeneration(XObject):
     def set_generation_result(self, success, content=""):
         self.success = success
         self.content = content
+        return self
 
     def init_api_response(self, api_response):
 
