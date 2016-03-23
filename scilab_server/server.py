@@ -12,8 +12,8 @@ from cStringIO import StringIO
 from xqueue_api import XQueueSession
 from xqueue_api.xsubmission import XSubmission
 
-from .executable import spawn_scilab
-from .settings import *
+from scilab_server.executable import spawn_scilab
+from scilab_server.settings import *
 from xqueue.xgeneration import XGeneration
 
 logger = logging.getLogger(__name__)
@@ -49,6 +49,7 @@ def do_generate(xgeneration):
 
     # Полный рабочий путь в системе, со временной директорией, сразу вычистим
     # TODO: generate RANDOM path using guid
+    TMP_PATH.makedirs_p()
     full_path = tempfile.mkdtemp(prefix=TMP_PATH)
 
     # Подчистка с самого начала нам не нужна, поскольку можно положиться на то,
@@ -101,6 +102,7 @@ def do_check(xsubmission):
         return xsubmission.set_grade(feedback='NZ: Загруженный файл должен быть .zip.')
 
     # Полный рабочий путь в системе, со временной директорией, сразу вычистим
+    TMP_PATH.makedirs_p()
     full_path = tempfile.mkdtemp(prefix=TMP_PATH)
 
     # Подчистка с самого начала нам не нужна, поскольку можно положиться на то,
