@@ -9,6 +9,7 @@ class XGeneration(XObject):
     success = False
     content = ""
     archive_url = None
+    grader_payload = None
 
     def set_generation_result(self, success, content=""):
         self.success = success
@@ -23,6 +24,7 @@ class XGeneration(XObject):
 
         body = json.loads(self.body)
         self.archive_url = body.get('archive_64_url')
+        self.grader_payload = body.get('grader_payload')
 
     def prepare_put(self):
 

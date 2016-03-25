@@ -19,6 +19,8 @@ from xqueue.xgeneration import XGeneration
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
+DEFAULT_TIMEOUT = 10
+
 
 def cleanup(cwd):
     cwd.rmtree_p()
@@ -46,6 +48,7 @@ def do_generate(xgeneration):
     # Archives
     archives = get_archives(xgeneration.archive_url)
     instructor_filename, instructor_file = get_raw_archive(archives, 'instructor_archive')
+    grader_payload = json.loads(xgeneration.grader_payload)
 
     # Полный рабочий путь в системе, со временной директорией, сразу вычистим
     # TODO: generate RANDOM path using guid
@@ -68,7 +71,7 @@ def do_generate(xgeneration):
     with open(filename, "a") as source_file:
         source_file.write("\nexit();\n")
 
-    generate_code = spawn_scilab(filename, timeout=15)
+    generate_code = spawn_scilab(filename, timeout=grader_payload.get('time_limit_generate') or DEFAULT_TIMEOUT)
 
     try:
         with open(full_path + '/pregenerated', 'r') as f:
@@ -89,7 +92,7 @@ def do_check(xsubmission):
 
     # Dicts
     student_input = json.loads(xsubmission.student_response)
-    grader_payload = xsubmission.grader_payload
+    grader_payload = json.loads(xsubmission.grader_payload)
 
     # Archives
     data = get_archives(student_input.get('archive_64_url'))
@@ -126,14 +129,14 @@ def do_check(xsubmission):
     with open(filename, "a") as source_file:
         source_file.write("exit();")
 
-    student_code = spawn_scilab(filename, timeout=15)
+    student_code = spawn_scilab(filename, timeout=grader_payload.get('time_limit_execute') or DEFAULT_TIMEOUT)
     if student_code.get('return_code') == -1:
         return xsubmission.set_grade(feedback='TL: Превышен лимит времени')
 
     # Запишем pregenerated, если он вообще есть
-    if xsubmission.grader_payload is not None:
+    if grader_payload.get('pregenerated') is not None:
         with open(full_path / "pregenerated", "w") as f:
-            f.write(xsubmission.grader_payload)
+            f.write(grader_payload['pregenerated'])
 
     try:
         instructor_archive.extractall(full_path)
@@ -146,7 +149,7 @@ def do_check(xsubmission):
     with open(filename, "a") as source_file:
         source_file.write("\nexit();\n")
 
-    checker_code = spawn_scilab(filename, timeout=15)
+    checker_code = spawn_scilab(filename, timeout=grader_payload.get('time_limit_check') or DEFAULT_TIMEOUT)
     if checker_code.get('return_code') == -1:
         return xsubmission.set_grade(feedback='ITL: Превышен лимит времени инструктором')
 
@@ -182,11 +185,6 @@ def main():
                 body = json.loads(xobject.body)
                 method = body['method']
 
-                # print u">%s<" % method
-                # print u"method==check => %s" % (method == u'check')
-                # print u"method==generate => %s" % (method == u'generate')
-                # print u"method==generate => %s" % (method == u'generate')
-
                 if method == u'check':
                     result = do_check(XSubmission.create_from_xobject(xobject))
 
@@ -195,9 +193,6 @@ def main():
                     result = do_generate(XGeneration.create_from_xobject(xobject))
 
                 else:
-                    print u"unknown method: %s" % method
-                    print u"method==check => %s" % (method == u'check')
-                    print u"method==generate => %s" % (method == u'generate')
                     result = make_result("Unknown method: %s" % method)
 
                 xsession.put_xresult(result)
@@ -205,7 +200,6 @@ def main():
             # decrease length size
             length -= 1
 
-        print "Will now sleep %ss" % POLL_INTERVAL
         time.sleep(POLL_INTERVAL)
 
 
