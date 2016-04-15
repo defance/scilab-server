@@ -104,8 +104,7 @@ def spawn_scilab(filename, cwd=None, timeout=None, extra_env=None, use_display=F
     # Для опредлеления того, завершился ли скрипт или ушёл в цикл скрипт,
     # будем мониторить вывод
     uid = str(uuid.uuid4())
-    script = SCILAB_EXEC_SCRIPT % (cwd, filename)
-    script += 'disp("%s");' % uid
+    script = SCILAB_EXEC_SCRIPT.format(pwd=cwd, filename=filename, token=uid)
 
     # Запускаем процесс
     # TODO Найти, как запустить scilab без шелла
@@ -142,5 +141,5 @@ def spawn_scilab(filename, cwd=None, timeout=None, extra_env=None, use_display=F
     # Возвращаем результат исполнения
     return {
         'code': return_code,
-        'stdout': output,
+        'output': output,
     }

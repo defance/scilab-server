@@ -33,6 +33,21 @@ def make_result(msg=None, grade=0.0):
     }
 
 
+def make_feedback(msg_type=None, message=None, output_execute=None, output_check=None, pregenerated=None):
+    result = {}
+    if msg_type is not None:
+        result['msg_type'] = msg_type
+    if message is not None:
+        result['message'] = message
+    if output_execute is not None:
+        result['output_execute'] = output_execute
+    if output_check is not None:
+        result['output_check'] = output_check
+    if pregenerated is not None:
+        result['pregenerated'] = pregenerated
+    return json.dumps(result)
+
+
 def get_raw_archive(data, archive):
     archive_path = path(data.get('%s_name' % archive))
     archive_raw = StringIO(base64.decodestring(data.get(archive)))
@@ -102,7 +117,8 @@ def do_check(xsubmission):
 
     # Проверка на то, что это действительно zip
     if student_filename.ext != '.zip':
-        return xsubmission.set_grade(feedback='NZ: Загруженный файл должен быть .zip.')
+        feedback = make_feedback(message='NZ: Загруженный файл должен быть .zip.', msg_type='error')
+        return xsubmission.set_grade(feedback=feedback, success=False)
 
     # Полный рабочий путь в системе, со временной директорией, сразу вычистим
     TMP_PATH.makedirs_p()
@@ -120,7 +136,8 @@ def do_check(xsubmission):
     try:
         student_archive.extractall(full_path)
     except Exception:
-        return xsubmission.set_grade(feedback='SAE: Не удалось открыть архив с ответом.')
+        feedback = make_feedback(message='SAE: Не удалось открыть архив с ответом.', msg_type='error')
+        return xsubmission.set_grade(feedback=feedback, success=False)
 
     # Процессу разрешено выполняться только 2 секунды
     filename = full_path / SCILAB_STUDENT_SCRIPT
@@ -131,7 +148,10 @@ def do_check(xsubmission):
 
     student_code = spawn_scilab(filename, timeout=grader_payload.get('time_limit_execute') or DEFAULT_TIMEOUT)
     if student_code.get('return_code') == -1:
-        return xsubmission.set_grade(feedback='TL: Превышен лимит времени')
+        feedback = make_feedback(message='TL: Превышен лимит времени', msg_type='error',
+                                 pregenerated=grader_payload.get('pregenerated'),
+                                 output_execute=student_code['output'])
+        return xsubmission.set_grade(feedback=feedback, success=False)
 
     # Запишем pregenerated, если он вообще есть
     if grader_payload.get('pregenerated') is not None:
@@ -141,7 +161,8 @@ def do_check(xsubmission):
     try:
         instructor_archive.extractall(full_path)
     except Exception:
-        return xsubmission.set_grade(feedback='IAE: Не удалось открыть архив инструктора.')
+        feedback = make_feedback(message='IAE: Не удалось открыть архив инструктора.', msg_type='error')
+        return xsubmission.set_grade(feedback=feedback, success=False)
 
     filename = full_path / SCILAB_INSTRUCTOR_SCRIPT
 
@@ -151,16 +172,27 @@ def do_check(xsubmission):
 
     checker_code = spawn_scilab(filename, timeout=grader_payload.get('time_limit_check') or DEFAULT_TIMEOUT)
     if checker_code.get('return_code') == -1:
-        return xsubmission.set_grade(feedback='ITL: Превышен лимит времени инструктором')
+        feedback = make_feedback(message='TL: Превышен лимит времени', msg_type='error',
+                                 pregenerated=grader_payload.get('pregenerated'),
+                                 output_execute=student_code['output'],
+                                 output_check=checker_code['output'])
+        return xsubmission.set_grade(feedback=feedback, success=False)
 
     try:
         f = open(full_path / 'check_output')
         result_grade = float(f.readline().strip())
         result_message = f.readline().strip()
     except IOError:
-        return xsubmission.set_grade(feedback='COE: Не удалось определить результат проверки.')
+        feedback = make_feedback(message='COE: Не удалось определить результат проверки.', msg_type='error',
+                                 output_execute=student_code['output'],
+                                 output_check=checker_code['output'])
+        return xsubmission.set_grade(feedback=feedback, success=False)
 
-    return xsubmission.set_grade(grade=result_grade, feedback=result_message, correctness=True)
+    feedback = make_feedback(message=result_message, msg_type='success',
+                             pregenerated=grader_payload.get('pregenerated'),
+                             output_execute=student_code['output'],
+                             output_check=checker_code['output'])
+    return xsubmission.set_grade(grade=result_grade, feedback=feedback, correctness=True, success=True)
 
 
 def main():

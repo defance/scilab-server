@@ -23,7 +23,11 @@ SCILAB_HOME = path("/opt/scilab-5.5.2/")
 SCILAB_STUDENT_SCRIPT = "solution.sce"
 SCILAB_INSTRUCTOR_SCRIPT = "check.sce"
 SCILAB_GENERATE_SCRIPT = "generate.sce"
-SCILAB_EXEC_SCRIPT = "chdir(\"%s\"); exec(\"%s\");"
+SCILAB_EXEC_SCRIPT = "disp('Execution started'); " \
+                     "chdir('{pwd}'); " \
+                     "exec('{filename}'); " \
+                     "disp('Finish token: {token}'); " \
+                     "exit();"
 
 XQUEUE_INTERFACE = {
     'url': 'http://localhost/',
