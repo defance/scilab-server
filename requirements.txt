@@ -1,4 +1,4 @@
 requests==2.9.1
 path.py==8.1.2
 
--e git+https://de.ifmo.ru/scm/git/ifmo-xqueue-api@aefce0a1a6cbc1e0f9b1e0f81fe1bb5a371ce2ac#egg=ifmo-xqueue-api==4.0
+-e git+https://de.ifmo.ru/scm/git/ifmo-xqueue-api@fbd1ce894064f03f62f86394227506b43cf4cc81#egg=ifmo-xqueue-api==4.1
