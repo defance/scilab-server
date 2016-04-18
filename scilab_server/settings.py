@@ -1,5 +1,6 @@
-import os
+import logging
 import json
+import os
 
 from path import path
 
@@ -20,3 +21,7 @@ SCILAB_EXEC = ENV_TOKENS.get('SCILAB_EXEC', SCILAB_EXEC)
 SCILAB_HOME = ENV_TOKENS.get('SCILAB_HOME', SCILAB_HOME)
 
 XQUEUE_INTERFACE = ENV_TOKENS.get('XQUEUE_INTERFACE', XQUEUE_INTERFACE)
+
+LOGGING_DEFAULT_PATH = path(PROJECT_ROOT / 'config' / 'logging.json')
+LOGGING_DEFAULT_LEVEL = logging.INFO
+LOGGING_ENV_KEY = 'LOG_CFG'

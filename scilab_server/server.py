@@ -2,8 +2,8 @@
 
 import base64
 import logging
+import logging.config
 import requests
-import sys
 import tempfile
 import time
 import zipfile
@@ -17,7 +17,6 @@ from scilab_server.settings import *
 from xqueue.xgeneration import XGeneration
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler(sys.stdout))
 
 DEFAULT_TIMEOUT = 10
 
@@ -195,11 +194,33 @@ def do_check(xsubmission):
     return xsubmission.set_grade(grade=result_grade, feedback=feedback, correctness=True, success=True)
 
 
+def setup_logging(
+    default_path=LOGGING_DEFAULT_PATH,
+    default_level=LOGGING_DEFAULT_LEVEL,
+    env_key=LOGGING_ENV_KEY
+):
+    """
+    Setup logging configuration
+    """
+    config_path = default_path
+    value = os.getenv(env_key, None)
+    if value:
+        config_path = path(value)
+    if config_path.exists():
+        with open(config_path, 'rt') as f:
+            config = json.load(f)
+        logging.config.dictConfig(config)
+    else:
+        logging.basicConfig(level=default_level)
+
+
 def main():
 
+    setup_logging()
+
     # Начинаем работу сервера
-    print ("Start polling xqueue")
-    print ("xqueue url = %s" % XQUEUE_INTERFACE['url'])
+    logger.info("Start polling xqueue")
+    logger.info("xqueue url = %s" % XQUEUE_INTERFACE['url'])
     while True:
         xsession = XQueueSession(base_url=XQUEUE_INTERFACE['url'],
                                  username=XQUEUE_INTERFACE['login'],
@@ -209,7 +230,7 @@ def main():
         length_result, length = xsession.get_len()
         if length_result and length:
 
-            print "Non zero length, retrieve submission"
+            logger.info("Non zero length, retrieve submission")
 
             xobject_result, xobject = xsession.get_xobject()
             if xobject_result:
@@ -221,7 +242,7 @@ def main():
                     result = do_check(XSubmission.create_from_xobject(xobject))
 
                 elif method == u'generate':
-                    print u"method==generate => %s" % (method == u'generate')
+                    logger.debug(u"method==generate => %s", (method == u'generate'))
                     result = do_generate(XGeneration.create_from_xobject(xobject))
 
                 else:

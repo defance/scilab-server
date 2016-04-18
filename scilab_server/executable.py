@@ -112,7 +112,7 @@ def spawn_scilab(filename, cwd=None, timeout=None, extra_env=None, use_display=F
     # что-то ему не даёт подключиться к Xserver'у
     cmd = [SCILAB_EXEC, '-e', script, '-nb']
     # logger.debug(" ".join(cmd))
-    print(" ".join(cmd))
+    logger.debug(" ".join(cmd))
     process = Popen(cmd,
                     cwd=cwd, env=env, stdout=PIPE, bufsize=1,  shell=False,
                     preexec_fn=demote())
@@ -135,8 +135,7 @@ def spawn_scilab(filename, cwd=None, timeout=None, extra_env=None, use_display=F
         else:
             return_code = -1
 
-    logging.info(output)
-    print output
+    logger.debug(output)
 
     # Возвращаем результат исполнения
     return {
