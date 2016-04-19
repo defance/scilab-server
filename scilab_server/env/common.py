@@ -37,3 +37,4 @@ XQUEUE_INTERFACE = {
 }
 
 POLL_INTERVAL = 5
+GRADER_ID = 'scilab_grader'

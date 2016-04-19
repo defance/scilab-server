@@ -100,7 +100,7 @@ def do_generate(xgeneration):
 
 def do_check(xsubmission):
 
-    xsubmission.set_grade(grader='scilab_grader_01')
+    xsubmission.set_grade(grader=GRADER_ID)
 
     result = {}
 
