@@ -249,6 +249,7 @@ def main():
                     result = make_result("Unknown method: %s" % method)
 
                 xsession.put_xresult(result)
+                logger.info("put_xresult completed")
 
             # decrease length size
             length -= 1
