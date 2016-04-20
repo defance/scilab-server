@@ -110,8 +110,13 @@ def spawn_scilab(filename, cwd=None, timeout=None, extra_env=None, use_display=F
     # TODO Найти, как запустить scilab без шелла
     # Если запускать его без шелла, то xcos не может отработать, поскольку
     # что-то ему не даёт подключиться к Xserver'у
+    timeout_params = []
+    if timeout:
+        timeout_params += ['-t', timeout]
     cmd = [SCILAB_EXEC, '-e', script, '-nb']
-    # logger.debug(" ".join(cmd))
+    if timeout_params:
+        logger.info("Timeout params are used: {params}".format(params=timeout_params))
+        cmd = timeout_params + cmd
     logger.debug(" ".join(cmd))
     process = Popen(cmd,
                     cwd=cwd, env=env, stdout=PIPE, bufsize=1,  shell=False,

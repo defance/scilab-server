@@ -6,6 +6,8 @@ TMP_PATH = path('/tmp/xblock_scilab/')
 SCILAB_EXEC = path("/opt/scilab-5.5.2/bin/scilab-adv-cli")
 SCILAB_HOME = path("/opt/scilab-5.5.2/")
 
+TIMEOUT_EXEC = path("/scilab/bin/timeout")
+
 # Server cloud cde
 # SCILAB_EXEC = path("/usr/bin/scilab-adv-cli")
 # SCILAB_HOME = path("/usr")
