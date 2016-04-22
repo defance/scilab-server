@@ -6,12 +6,18 @@ from path import path
 
 from .env.common import *
 
+log = logging.getLogger(__name__)
+
 
 PROJECT_ROOT = path(__file__).abspath().dirname()
 REPO_ROOT = PROJECT_ROOT.dirname()
 ENV_ROOT = REPO_ROOT.dirname()
 CONFIG_ROOT = path(os.environ.get('CONFIG_ROOT', ENV_ROOT))
 CONFIG_FILE = path(os.environ.get('SCILAB_ENV', "scilab-server.env.json"))
+
+log.info("CONFIG_ROOT = %s" % CONFIG_ROOT)
+log.info("CONFIG_FILE = %s" % CONFIG_FILE)
+log.info("Opening env file: %s" % CONFIG_ROOT / CONFIG_FILE)
 
 with open(CONFIG_ROOT / CONFIG_FILE) as env_file:
     ENV_TOKENS = json.load(env_file)

@@ -8,14 +8,6 @@ SCILAB_HOME = path("/opt/scilab-5.5.2/")
 
 TIMEOUT_EXEC = path("/scilab/bin/timeout")
 
-# Server cloud cde
-# SCILAB_EXEC = path("/usr/bin/scilab-adv-cli")
-# SCILAB_HOME = path("/usr")
-
-# lms server
-# SCILAB_EXEC = path("/ifmo/app/scilab-5.5.2/bin/scilab-adv-cli")
-# SCILAB_HOME = path("/ifmo/app/scilab-5.5.2")
-
 SCILAB_STUDENT_SCRIPT = "solution.sce"
 SCILAB_INSTRUCTOR_SCRIPT = "check.sce"
 SCILAB_GENERATE_SCRIPT = "generate.sce"
