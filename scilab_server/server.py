@@ -218,9 +218,9 @@ def main():
 
     setup_logging()
 
-    log.info("CONFIG_ROOT = %s" % CONFIG_ROOT)
-    log.info("CONFIG_FILE = %s" % CONFIG_FILE)
-    log.info("Opening env file: %s" % CONFIG_ROOT / CONFIG_FILE)
+    logger.info("CONFIG_ROOT = %s" % CONFIG_ROOT)
+    logger.info("CONFIG_FILE = %s" % CONFIG_FILE)
+    logger.info("Opening env file: %s" % CONFIG_ROOT / CONFIG_FILE)
 
     # Начинаем работу сервера
     logger.info("Start polling xqueue")
