@@ -134,7 +134,7 @@ def spawn_scilab(filename, cwd=None, timeout=None, extra_env=None, use_display=F
     else:
         # time.sleep(timeout)
         # output = read_all(process)
-        err_output, output = process.communicate()
+        output, err_output = process.communicate()
         # os.killpg(process.pid, signal.SIGTERM)
         if output.find(uid) != -1:
             return_code = 0
