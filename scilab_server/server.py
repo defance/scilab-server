@@ -39,7 +39,7 @@ def make_feedback(msg_type=None, message=None, output_execute=None, output_check
     if message is not None:
         result['message'] = message
     if output_execute is not None:
-        result['output_execute'] = unicode(output_execute, erros='replace')
+        result['output_execute'] = unicode(output_execute, errors='replace')
     if output_check is not None:
         result['output_check'] = unicode(output_check, errors='replace')
     if pregenerated is not None:
