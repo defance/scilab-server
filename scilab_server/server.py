@@ -39,9 +39,9 @@ def make_feedback(msg_type=None, message=None, output_execute=None, output_check
     if message is not None:
         result['message'] = message
     if output_execute is not None:
-        result['output_execute'] = output_execute
+        result['output_execute'] = unicode(output_execute, erros='replace')
     if output_check is not None:
-        result['output_check'] = output_check
+        result['output_check'] = unicode(output_check, errors='replace')
     if pregenerated is not None:
         result['pregenerated'] = pregenerated
     return json.dumps(result)
