@@ -121,7 +121,7 @@ def spawn_scilab(filename, cwd=None, timeout=None, extra_env=None, use_display=F
     process = Popen(cmd,
                     cwd=cwd, env=env, stdout=PIPE, bufsize=1,  shell=False,
                     preexec_fn=demote())
-    set_non_block(process)
+    # set_non_block(process)
 
     # Убиваем по таймауту или ждём окончания исполнения, если он не задан
     if timeout is None:
@@ -132,8 +132,9 @@ def spawn_scilab(filename, cwd=None, timeout=None, extra_env=None, use_display=F
         output = read_all(process)
         return_code = process.returncode
     else:
-        time.sleep(timeout)
-        output = read_all(process)
+        # time.sleep(timeout)
+        # output = read_all(process)
+        err_output, output = process.communicate()
         os.killpg(process.pid, signal.SIGTERM)
         if output.find(uid) != -1:
             return_code = 0
