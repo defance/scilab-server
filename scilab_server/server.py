@@ -114,11 +114,6 @@ def do_check(xsubmission):
     student_filename, student_file = get_raw_archive(data, 'user_archive')
     instructor_filename, instructor_file = get_raw_archive(data, 'instructor_archive')
 
-    # Проверка на то, что это действительно zip
-    if student_filename.ext != '.zip':
-        feedback = make_feedback(message='NZ: Загруженный файл должен быть .zip.', msg_type='error')
-        return xsubmission.set_grade(feedback=feedback, success=False)
-
     # Полный рабочий путь в системе, со временной директорией, сразу вычистим
     TMP_PATH.makedirs_p()
     full_path = tempfile.mkdtemp(prefix=TMP_PATH)
@@ -135,7 +130,8 @@ def do_check(xsubmission):
     try:
         student_archive.extractall(full_path)
     except Exception:
-        feedback = make_feedback(message='SAE: Не удалось открыть архив с ответом.', msg_type='error')
+        feedback = make_feedback(message='SAE: Не удалось открыть архив с ответом. Загруженный файл должен быть .zip.',
+                                 msg_type='error')
         return xsubmission.set_grade(feedback=feedback, success=False)
 
     # Процессу разрешено выполняться только 2 секунды
