@@ -221,7 +221,7 @@ def main():
     logger.info("Starting server...")
     logger.info("CONFIG_ROOT = %s" % CONFIG_ROOT)
     logger.info("CONFIG_FILE = %s" % CONFIG_FILE)
-    logger.info("Opening env file: %s" % CONFIG_ROOT / CONFIG_FILE)
+    logger.info("Opening env file: %s" % (CONFIG_ROOT / CONFIG_FILE))
     logger.info("xqueue url = %s" % XQUEUE_INTERFACE['url'])
 
     # Начинаем работу сервера
