@@ -241,12 +241,12 @@ def main():
 
                 body = json.loads(xobject.body)
                 method = body['method']
+                logger.info('Received method: {method}'.format(method=method))
 
                 if method == u'check':
                     result = do_check(XSubmission.create_from_xobject(xobject))
 
                 elif method == u'generate':
-                    logger.debug(u"method==generate => %s", (method == u'generate'))
                     result = do_generate(XGeneration.create_from_xobject(xobject))
 
                 else:
