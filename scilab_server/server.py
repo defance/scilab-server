@@ -122,14 +122,11 @@ def do_check(xsubmission):
     # что будет создан уникальный путь
     # cleanup(cwd=full_path)
 
-    # Получаем архивы
-    student_archive = zipfile.ZipFile(student_file)
-    instructor_archive = zipfile.ZipFile(instructor_file)
-
     # Извлекаем архив студента
     try:
+        student_archive = zipfile.ZipFile(student_file)
         student_archive.extractall(full_path)
-    except Exception:
+    except (zipfile.BadZipfile, IOError):
         feedback = make_feedback(message='SAE: Не удалось открыть архив с ответом. Загруженный файл должен быть .zip.',
                                  msg_type='error')
         return xsubmission.set_grade(feedback=feedback, success=False)
@@ -154,8 +151,9 @@ def do_check(xsubmission):
             f.write(grader_payload['pregenerated'])
 
     try:
+        instructor_archive = zipfile.ZipFile(instructor_file)
         instructor_archive.extractall(full_path)
-    except Exception:
+    except (zipfile.BadZipfile, IOError):
         feedback = make_feedback(message='IAE: Не удалось открыть архив инструктора.', msg_type='error')
         return xsubmission.set_grade(feedback=feedback, success=False)
 
