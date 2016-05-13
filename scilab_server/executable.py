@@ -112,7 +112,7 @@ def spawn_scilab(filename, cwd=None, timeout=None, extra_env=None, use_display=F
     # что-то ему не даёт подключиться к Xserver'у
     timeout_params = []
     if timeout:
-        timeout_params += ['/ifmo/bin/timeout', '-t', str(timeout)]
+        timeout_params += ['/ifmo/bin/timeout', '-t', str(timeout), '--detect-hangups']
     cmd = [SCILAB_EXEC, '-e', script, '-nb']
     if timeout_params:
         logger.info("Timeout params are used: {params}".format(params=timeout_params))
