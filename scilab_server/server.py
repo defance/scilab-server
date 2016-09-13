@@ -3,6 +3,7 @@
 import base64
 import logging
 import logging.config
+import os.path
 import requests
 import tempfile
 import time
@@ -88,7 +89,7 @@ def do_generate(xgeneration):
     generate_code = spawn_scilab(filename, timeout=grader_payload.get('time_limit_generate') or DEFAULT_TIMEOUT)
 
     try:
-        with open(full_path + '/pregenerated', 'r') as f:
+        with open(full_path + '/generate_output', 'r') as f:
             pregenerated = f.read()
     except IOError:
         return xgeneration.set_generation_result(False, "Pregenerated read error")
@@ -134,20 +135,25 @@ def do_check(xsubmission):
     # Процессу разрешено выполняться только 2 секунды
     filename = full_path / SCILAB_STUDENT_SCRIPT
 
-    # Допишем функцию выходна, на всякий случай
-    with open(filename, "a") as source_file:
-        source_file.write("exit();")
+    if os.path.exists(filename):
 
-    student_code = spawn_scilab(filename, timeout=grader_payload.get('time_limit_execute') or DEFAULT_TIMEOUT)
-    if student_code.get('return_code') == -1:
-        feedback = make_feedback(message='TL: Превышен лимит времени', msg_type='error',
-                                 pregenerated=grader_payload.get('pregenerated'),
-                                 output_execute=student_code['output'])
-        return xsubmission.set_grade(feedback=feedback, success=False)
+        # Допишем функцию выходна, на всякий случай
+        with open(filename, "a") as source_file:
+            source_file.write("exit();")
+
+        student_code = spawn_scilab(filename, timeout=grader_payload.get('time_limit_execute') or DEFAULT_TIMEOUT)
+        if student_code.get('return_code') == -1:
+            feedback = make_feedback(message='TL: Превышен лимит времени', msg_type='error',
+                                     pregenerated=grader_payload.get('pregenerated'),
+                                     output_execute=student_code['output'])
+            return xsubmission.set_grade(feedback=feedback, success=False)
+
+    else:
+        logging.debug("No executable found in student answer (does not exists): %s" % filename)
 
     # Запишем pregenerated, если он вообще есть
     if grader_payload.get('pregenerated') is not None:
-        with open(full_path / "pregenerated", "w") as f:
+        with open(full_path / "generate_output", "w") as f:
             f.write(grader_payload['pregenerated'])
 
     try:
