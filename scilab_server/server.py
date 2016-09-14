@@ -149,6 +149,10 @@ def do_check(xsubmission):
             return xsubmission.set_grade(feedback=feedback, success=False)
 
     else:
+        student_code = {
+            'return_code': -2,
+            'output': None,
+        }
         logging.debug("No executable found in student answer (does not exists): %s" % filename)
 
     # Запишем pregenerated, если он вообще есть
