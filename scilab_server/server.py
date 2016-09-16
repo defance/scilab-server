@@ -262,6 +262,11 @@ def main():
             # decrease length size
             length -= 1
 
+        elif not length_result:
+
+            # In case of error length will contain detailed requests error message
+            logger.error(length)
+
         time.sleep(POLL_INTERVAL)
 
 
