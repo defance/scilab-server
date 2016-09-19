@@ -244,7 +244,7 @@ def main():
             if xobject_result:
 
                 body = json.loads(xobject.body)
-                method = body['method']
+                method = body.get('method', None)
                 logger.info('Received method: {method}'.format(method=method))
 
                 if method == u'check':
@@ -254,7 +254,7 @@ def main():
                     result = do_generate(XGeneration.create_from_xobject(xobject))
 
                 else:
-                    result = make_result("Unknown method: %s" % method)
+                    result = do_error(XSubmission.create_from_xobject(xobject), "Unknown method for scilab-server: %s" % method)
 
                 xsession.put_xresult(result)
                 logger.info("put_xresult completed")
@@ -268,6 +268,11 @@ def main():
             logger.error(length)
 
         time.sleep(POLL_INTERVAL)
+
+
+def do_error(xsubmission, msg=None):
+    xsubmission.set_grade(grade=0, feedback=msg, correctness=False, success=False)
+    return xsubmission
 
 
 if __name__ == "__main__":
