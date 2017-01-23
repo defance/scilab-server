@@ -6,8 +6,9 @@ import time
 
 from xqueue_api import XQueueSession
 
-from scilabserver_plugin import ScilabServerPlugin
+from scilab_server.plugins import load_plugins
 from scilab_server.settings import *
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,9 @@ def main():
                                  password=XQUEUE_INTERFACE['password'],
                                  queue=XQUEUE_INTERFACE['queue'],
                                  autoconnect=True)
+
+        plugins = load_plugins()
+
         length_result, length = xsession.get_len()
         if length_result and length:
 
@@ -42,12 +46,17 @@ def main():
             if xobject_result:
 
                 body = json.loads(xobject.body)
-                method = body.get('method', None)
+                try:
+                    active_plugin = plugins[body['submission_sender']]
+                    method = body.get('method')
+                except KeyError or ValueError:
+                    logger.error('Unknown plugin, or plugin not loaded: %s' % body.get('submission_sender'))
+                    continue
+
+                logger.info('Active plugin: %s' % active_plugin.__class__.__name__)
                 logger.info('Received method: {method}'.format(method=method))
 
-                configuration = get_plugin_configuration(plugin=ScilabServerPlugin)
-                plugin = ScilabServerPlugin(configuration=configuration)
-                result = plugin.handle(method, xobject=xobject)
+                result = active_plugin.handle(method, xobject=xobject)
 
                 xsession.put_xresult(result)
                 logger.info("put_xresult completed")

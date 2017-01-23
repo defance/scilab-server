@@ -66,13 +66,14 @@ def get_plugin_configuration(plugin=None):
     :return:
     """
     plugin_display_name = plugin
+    plugin_ref = plugin
     if issubclass(plugin, IfmoXBServerPlugin):
-        plugin = IfmoXBServerPlugin.configuration_section
+        plugin_ref = plugin.configuration_section
         plugin_display_name = plugin.__name__
 
     configuration = {
         "GRADER_ID": "%s::%s" % (SERVER_ID, plugin_display_name)
     }
 
-    configuration.update(PLUGIN_CONFIGURATION.get(plugin, {}))
+    configuration.update(PLUGIN_CONFIGURATION.get(plugin_ref, {}))
     return configuration
