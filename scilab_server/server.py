@@ -27,6 +27,8 @@ def main():
     logger.info("Opening env file: %s" % (CONFIG_ROOT / CONFIG_FILE))
     logger.info("xqueue url = %s" % XQUEUE_INTERFACE['url'])
 
+    plugins = load_plugins()
+
     # Начинаем работу сервера
     while True:
         xsession = XQueueSession(base_url=XQUEUE_INTERFACE['url'],
@@ -34,8 +36,6 @@ def main():
                                  password=XQUEUE_INTERFACE['password'],
                                  queue=XQUEUE_INTERFACE['queue'],
                                  autoconnect=True)
-
-        plugins = load_plugins()
 
         length_result, length = xsession.get_len()
         if length_result and length:
