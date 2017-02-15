@@ -47,7 +47,8 @@ def main():
 
                 body = json.loads(xobject.body)
                 try:
-                    active_plugin = plugins[body['submission_sender']]
+                    # TODO: Temporary compatibility: default plugin is scilab
+                    active_plugin = plugins[body.get('submission_sender', 'ifmo_xblock_scilab')]
                     method = body.get('method')
                 except KeyError or ValueError:
                     logger.error('Unknown plugin, or plugin not loaded: %s' % body.get('submission_sender'))
